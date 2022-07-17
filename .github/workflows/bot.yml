@@ -1,0 +1,32 @@
+name: bot
+on:
+  schedule:
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  gh-issue-diary:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: actions/cache@v3
+        with:
+          path: .github/actions/bot/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('.github/actions/bot/package-lock.json') }}
+      - name: build
+        working-directory: .github/actions/bot
+        run: |
+          npm ci
+          npm run build
+      - name: run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          ISSUE_TEMPLATE: template.md
+          TYPETALK_TOPIC_ID: ${{ secrets.TYPETALK_TOPIC_ID }}
+          TYPETALK_TOKEN: ${{ secrets.TYPETALK_TOKEN }}
+        run: |
+          node .github/actions/bot/index.js
