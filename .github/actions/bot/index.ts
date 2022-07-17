@@ -61,7 +61,11 @@ const octokit = new Octokit({
       })
       .join('\n');
 
-    const body = `${issue.title}\n${issue.body}\nコメント:\n${comments}\n`;
+    const issueBody = issue.body
+      .replace(/^- \[ \]/, '- :large_green_square:')
+      .replace(/^- \[x\]/, '- :white_check_mark:');
+
+    const body = `${issue.title}\n${issueBody}\nコメント:\n${comments}\n`;
 
     // @ts-ignore(TS2304)
     await fetch(
