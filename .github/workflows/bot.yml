@@ -28,5 +28,6 @@ jobs:
           ISSUE_TEMPLATE: template.md
           TYPETALK_TOPIC_ID: ${{ secrets.TYPETALK_TOPIC_ID }}
           TYPETALK_TOKEN: ${{ secrets.TYPETALK_TOKEN }}
+          ASSIGN_USER: ny-a
         run: |
           node .github/actions/bot/index.js
