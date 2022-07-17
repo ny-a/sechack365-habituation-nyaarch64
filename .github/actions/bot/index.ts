@@ -13,15 +13,15 @@ const typetalkTopicId = process.env.TYPETALK_TOPIC_ID;
 const typetalkToken = process.env.TYPETALK_TOKEN;
 const targetDayOffsetString = process.env.TARGET_DAY_OFFSET;
 
-if (repository === undefined) {
+if (!repository) {
   console.error('REPOSITORY environment variable is not set.');
   process.exit(1);
 }
-if (typetalkTopicId === undefined) {
+if (!typetalkTopicId) {
   console.error('TYPETALK_TOPIC_ID environment variable is not set.');
   process.exit(1);
 }
-if (typetalkToken === undefined) {
+if (!typetalkToken) {
   console.error('TYPETALK_TOKEN environment variable is not set.');
   process.exit(1);
 }
