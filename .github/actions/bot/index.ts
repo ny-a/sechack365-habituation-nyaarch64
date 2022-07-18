@@ -76,19 +76,9 @@ const entrypoint = (async () => {
       .replace(/^- \[ \]/gm, '- :large_green_square:')
       .replace(/^- \[x\]/gm, '- :white_check_mark:');
 
-    const body = `${issue.title}\n${issueBody}\nコメント:\n${comments}\n`;
+    const message = `${issue.title}振り返り\n${issueBody}\nコメント:\n${comments}\n`;
 
-    await fetch(
-      `https://typetalk.com/api/v1/topics/${typetalkTopicId}`,
-      {
-        headers: {
-          'X-TYPETALK-TOKEN': typetalkToken,
-          'Content-Type': 'application/json'
-        },
-        method: 'post',
-        body: JSON.stringify({ message: body })
-      }
-    )
+    await postToTypeTalk(message);
 
     if (!dryRun) {
       const issueCloseResult = await octokit.issues.update({
@@ -127,18 +117,21 @@ const entrypoint = (async () => {
     }
   }
 
-  await fetch(
-    `https://typetalk.com/api/v1/topics/${typetalkTopicId}`,
+  await postToTypeTalk(`${issueTitle}の目標：\n${issueBody}`)
+});
+
+const postToTypeTalk = (message: string, topicId: string = typetalkTopicId, token: string = typetalkToken) =>
+  fetch(
+    `https://typetalk.com/api/v1/topics/${topicId}`,
     {
       headers: {
-        'X-TYPETALK-TOKEN': typetalkToken,
+        'X-TYPETALK-TOKEN': token,
         'Content-Type': 'application/json'
       },
       method: 'post',
-      body: JSON.stringify({ message: `${issueTitle}の目標：\n${issueBody}` })
+      body: JSON.stringify({ message })
     }
-  )
-});
+  );
 
 const dateStringToLocalTime = (s: string) => {
   const date = new Date(s);
