@@ -38,8 +38,18 @@ const octokit = new Octokit({
   userAgent: 'ny-a/sechack365-habituation',
 });
 
-(async () => {
+const entrypoint = (async () => {
   const now = new Date();
+
+  const countdownMessage = getCountdownMessage(now);
+
+  if (countdownMessage === undefined) {
+    // SecHack365 2022 has been ended. Do nothing.
+    return;
+  }
+
+  const issueBody = `${countdownMessage}\n${issueTemplateContent}`;
+
   now.setHours(now.getHours() + 9); // convert ISOString (UTC) to JST
   const issueList = await octokit.paginate(octokit.issues.listForRepo, {
     owner: repoOwner,
@@ -97,6 +107,8 @@ const octokit = new Octokit({
   const targetDay = new Date(now.getTime());
   targetDay.setDate(targetDay.getDate() + targetDayOffset);
 
+  const issueTitle = targetDay.toISOString().slice(0, 10);
+
   if (!dryRun) {
     const labels = diaryLabel !== undefined ? [diaryLabel] : [];
     const assignees = userName !== undefined ? [userName] : [];
@@ -104,8 +116,8 @@ const octokit = new Octokit({
     const issueOpenResult = await octokit.issues.create({
       owner: repoOwner,
       repo: repoName,
-      title: targetDay.toISOString().slice(0, 10),
-      body: issueTemplateContent,
+      title: issueTitle,
+      body: issueBody,
       labels,
       assignees,
     })
@@ -114,7 +126,19 @@ const octokit = new Octokit({
       return;
     }
   }
-})();
+
+  await fetch(
+    `https://typetalk.com/api/v1/topics/${typetalkTopicId}`,
+    {
+      headers: {
+        'X-TYPETALK-TOKEN': typetalkToken,
+        'Content-Type': 'application/json'
+      },
+      method: 'post',
+      body: JSON.stringify({ message: `${issueTitle}の目標：\n${issueBody}` })
+    }
+  )
+});
 
 const dateStringToLocalTime = (s: string) => {
   const date = new Date(s);
@@ -122,3 +146,30 @@ const dateStringToLocalTime = (s: string) => {
   return `${date.getUTCHours().toString().padStart(2, '0')}:${date.getUTCMinutes().toString().padStart(2, '0')}:${date.getUTCSeconds().toString().padStart(2, '0')}`
 }
 
+const getCountdownMessage = (now: Date): string | undefined => {
+  const nextEventDay = getNextEventDay(now);
+
+  if (nextEventDay === undefined) {
+    return undefined;
+  }
+  const { name, date } = nextEventDay;
+  const remainingDays = Math.ceil((date.getTime() - now.getTime()) / 1000 / 60 / 60 / 24);
+  return `${name}まであと${remainingDays}日`;
+}
+
+const getNextEventDay = (now: Date): ({ name: string, date: Date } | undefined) => {
+  const events = [
+    { name: '第1回イベント', date: new Date('2022-06-11T00:00:00+09:00') },
+    { name: '第2回イベント', date: new Date('2022-07-09T00:00:00+09:00') },
+    { name: '第3回イベント', date: new Date('2022-08-24T00:00:00+09:00') },
+    { name: '第4回イベント', date: new Date('2022-10-01T00:00:00+09:00') },
+    { name: '第5回イベント', date: new Date('2022-11-11T00:00:00+09:00') },
+    { name: '第6回イベント', date: new Date('2023-01-27T00:00:00+09:00') },
+    { name: '成果発表会', date: new Date('2023-03-04T00:00:00+09:00') },
+    { name: '2022年度終了', date: new Date('2023-04-01T00:00:00+09:00') },
+  ]
+
+  return events.find(({ date }) => now < date);
+}
+
+(() => entrypoint())()
