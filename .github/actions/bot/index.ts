@@ -7,9 +7,9 @@ const GH_TOKEN = process.env.GH_TOKEN;
 const dryRun = process.env.DRY_RUN === 'true';
 
 const repository = process.env.REPOSITORY;
-const userName = process.env.ASSIGN_USER || undefined;
-const diaryLabel = process.env.ISSUE_LABEL || undefined;
-const issueTemplate = process.env.ISSUE_TEMPLATE || undefined;
+const userName = process.env.ASSIGN_USER;
+const diaryLabel = process.env.ISSUE_LABEL;
+const issueTemplate = process.env.ISSUE_TEMPLATE;
 const typetalkTopicId = process.env.TYPETALK_TOPIC_ID;
 const typetalkToken = process.env.TYPETALK_TOKEN;
 const targetDayOffsetString = process.env.TARGET_DAY_OFFSET;
@@ -27,7 +27,7 @@ if (!typetalkToken) {
   process.exit(1);
 }
 
-const issueTemplateContent = issueTemplate !== undefined && fs.existsSync(issueTemplate) && fs.readFileSync(issueTemplate, { encoding: 'utf-8' }) || '';
+const issueTemplateContent = issueTemplate && fs.existsSync(issueTemplate) && fs.readFileSync(issueTemplate, { encoding: 'utf-8' }) || '';
 
 const targetDayOffset = parseInt(targetDayOffsetString || '') || 0;
 
@@ -110,8 +110,8 @@ const entrypoint = (async () => {
   const issueTitle = targetDay.toISOString().slice(0, 10);
 
   if (!dryRun) {
-    const labels = diaryLabel !== undefined ? [diaryLabel] : [];
-    const assignees = userName !== undefined ? [userName] : [];
+    const labels = diaryLabel ? [diaryLabel] : [];
+    const assignees = userName ? [userName] : [];
 
     const issueOpenResult = await octokit.issues.create({
       owner: repoOwner,
