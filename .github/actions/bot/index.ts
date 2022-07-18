@@ -1,4 +1,5 @@
 import { Octokit } from "@octokit/rest";
+import fetch from 'node-fetch';
 import fs from 'fs';
 import * as process from 'process';
 
@@ -67,7 +68,6 @@ const octokit = new Octokit({
 
     const body = `${issue.title}\n${issueBody}\nコメント:\n${comments}\n`;
 
-    // @ts-ignore(TS2304)
     await fetch(
       `https://typetalk.com/api/v1/topics/${typetalkTopicId}`,
       {
