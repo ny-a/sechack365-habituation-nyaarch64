@@ -67,7 +67,7 @@ const entrypoint = (async () => {
 
     const comments = issueComments
       .map((comment) => {
-        const user = comment.user && comment.user.login !== userName ? ` (@${comment.user?.login})` : '';
+        const user = comment.user && comment.user.login !== repoOwner ? ` (@${comment.user?.login})` : '';
         return `${dateStringToLocalTime(comment.created_at)}${user} ${comment.body}`;
       })
       .join('\n');
