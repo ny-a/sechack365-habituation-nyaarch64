@@ -48,7 +48,7 @@ const entrypoint = (async () => {
     return;
   }
 
-  const issueBody = `${countdownMessage}\n${issueTemplateContent}`;
+  const issueBody = `${countdownMessage}\n${convertIssueBodyToEmoji(issueTemplateContent)}`;
 
   now.setHours(now.getHours() + 9); // convert ISOString (UTC) to JST
   const issueList = await octokit.paginate(octokit.issues.listForRepo, {
@@ -72,9 +72,7 @@ const entrypoint = (async () => {
       })
       .join('\n');
 
-    const issueBody = (issue.body || '')
-      .replace(/^- \[ \]/gm, '- :large_green_square:')
-      .replace(/^- \[x\]/gm, '- :white_check_mark:');
+    const issueBody = convertIssueBodyToEmoji(issue.body);
 
     const message = `${issue.title}振り返り\n${issueBody}\nコメント:\n${comments}\n`;
 
@@ -119,6 +117,11 @@ const entrypoint = (async () => {
 
   await postToTypeTalk(`${issueTitle}の目標：\n${issueBody}`)
 });
+
+const convertIssueBodyToEmoji = (body: string | null | undefined) =>
+  (body || '')
+    .replace(/^- \[ \]/gm, '- :large_green_square:')
+    .replace(/^- \[x\]/gm, '- :white_check_mark:');
 
 const postToTypeTalk = (message: string, topicId: string = typetalkTopicId, token: string = typetalkToken) =>
   fetch(
