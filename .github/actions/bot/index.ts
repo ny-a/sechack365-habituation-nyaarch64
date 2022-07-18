@@ -48,8 +48,6 @@ const entrypoint = (async () => {
     return;
   }
 
-  const issueBody = `${countdownMessage}\n${convertIssueBodyToEmoji(issueTemplateContent)}`;
-
   now.setHours(now.getHours() + 9); // convert ISOString (UTC) to JST
   const issueList = await octokit.paginate(octokit.issues.listForRepo, {
     owner: repoOwner,
@@ -96,6 +94,7 @@ const entrypoint = (async () => {
   targetDay.setDate(targetDay.getDate() + targetDayOffset);
 
   const issueTitle = targetDay.toISOString().slice(0, 10);
+  const issueBody = `${countdownMessage}\n${issueTemplateContent}`;
 
   if (!dryRun) {
     const labels = diaryLabel ? [diaryLabel] : [];
@@ -115,7 +114,7 @@ const entrypoint = (async () => {
     }
   }
 
-  await postToTypeTalk(`${issueTitle}の目標：\n${issueBody}`)
+  await postToTypeTalk(`${issueTitle}の目標：\n${convertIssueBodyToEmoji(issueBody)}`)
 });
 
 const convertIssueBodyToEmoji = (body: string | null | undefined) =>
